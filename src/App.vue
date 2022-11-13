@@ -2,6 +2,7 @@
 import axios from "axios";
 import AppHeader from './components/AppHeader.vue';
 import AppGrid from './components/AppGrid.vue';
+import ChangePage from './components/ChangePage.vue';
 
 import { store } from "./store";
 
@@ -9,21 +10,52 @@ export default {
   components: {
       AppHeader,
       AppGrid,
+      ChangePage
     },
     data(){
       return{
         store,
+        urlPage: "https://rickandmortyapi.com/api/character",
+        actualPage : 1,
+        prevPage : this.actualPage - 1,
+        nextPage : this.actualPage + 1,
       }
     },
     created () {
-      console.log("ciao")
 
-
-      axios.get("https://rickandmortyapi.com/api/character").then((resp) => {
+      axios.get(this.urlPage).then((resp) => {
         this.store.characters = resp.data.results;
-        console.log("ciao")
+        console.log(resp.data.info.pages)
         });
     },
+      methods : {
+
+      changePrevPage(){
+        this.actualPage --
+
+        let apiBase = `https://rickandmortyapi.com/api/character?page=${this.actualPage}`
+
+        axios.get(apiBase).then((resp) => {
+            this.urlPage = apiBase
+            console.log(this.actualPage + " actual");
+            console.log(resp.data.info.pages)
+            console.log(resp.data.info.next)
+          })
+      },
+
+      changeNextPage(){
+        this.actualPage ++
+
+        let apiBase = `https://rickandmortyapi.com/api/character?page=${this.actualPage}`
+
+        axios.get(apiBase).then((resp) => {
+        this.urlPage = apiBase
+        console.log(this.actualPage + " actual");
+        console.log(resp.data.info.pages)
+        console.log(resp.data.info.next)
+        })
+      },
+    }
   }
 
     
@@ -31,7 +63,9 @@ export default {
 
 <template>
   <body>
-      <AppHeader />  
+      <AppHeader /> 
+      <ChangePage @changeRight="changeNextPage" 
+                  @changeLeft="changePrevPage" /> 
       <AppGrid />
   </body>
 
